@@ -507,3 +507,44 @@ padding:25px;
 }
 
 }
+body{
+
+background:#000;
+
+transition:background 1s;
+
+}
+
+.story{
+
+animation:fadeScene .8s ease;
+
+}
+
+.big{
+
+text-shadow:
+
+0 0 10px rgba(255,255,255,.15);
+
+}
+
+.phoneButton{
+
+box-shadow:
+
+0 0 20px rgba(255,255,255,.05);
+
+}
+
+.phoneButton:active{
+
+transform:scale(.96);
+
+}
+
+::-webkit-scrollbar{
+
+display:none;
+
+}
