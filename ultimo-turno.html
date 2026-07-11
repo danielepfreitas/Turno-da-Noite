@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TURNO DA NOITE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=VT323&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0b0b10; --teal:#2ee6a8; --red:#8a1f2b; --static:#4a4a52; --amber:#f4b860; --cream:#ece7da; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{ margin:0; padding:0; height:100%; width:100%; background:var(--bg); color:var(--cream);
+    font-family:'Special Elite', monospace; overflow:hidden; user-select:none; touch-action:manipulation; }
+  #app{ position:relative; height:100vh; width:100vw; display:flex; flex-direction:column;
+    background:radial-gradient(ellipse at center, #14141c 0%, #08080c 100%); transition:background 1.2s ease; }
+  #app.warm{ background:radial-gradient(ellipse at center, #201509 0%, #0b0906 100%); }
+  #app::before{ content:""; position:absolute; inset:0; pointer-events:none; z-index:50;
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 2px, transparent 3px);
+    mix-blend-mode:overlay; }
+  #app::after{ content:""; position:absolute; inset:0; pointer-events:none; z-index:51; box-shadow: inset 0 0 140px rgba(0,0,0,0.85); }
+  .grain{ position:absolute; inset:0; z-index:49; pointer-events:none; opacity:0.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: grain 0.4s steps(2) infinite; }
+  @keyframes grain{ 0%{transform:translate(0,0)} 50%{transform:translate(-2%,1%)} 100%{transform:translate(1%,-1%)} }
+  .shake{ animation: shake 0.4s; }
+  @keyframes shake{ 0%,100%{transform:translate(0,0)} 20%{transform:translate(-6px,3px)} 40%{transform:translate(5px,-4px)}
+    60%{transform:translate(-4px,2px)} 80%{transform:translate(3px,-3px)} }
+
+  #hud{ position:absolute; top:12px; left:16px; right:16px; z-index:60; display:flex; justify-content:space-between; align-items:center;
+    font-family:'VT323', monospace; font-size:19px; letter-spacing:1px; color:var(--teal);
+    text-shadow:0 0 6px rgba(46,230,168,0.6); transition:color 0.8s ease; }
+  #hud.warm{ color:var(--amber); text-shadow:0 0 8px rgba(244,184,96,0.7); }
+  #rec{ display:flex; align-items:center; gap:6px; }
+  #rec-dot{ width:10px; height:10px; border-radius:50%; background:var(--red); animation: blink 1s steps(2) infinite; }
+  #rec-dot.heart{ background:var(--amber); animation:none; clip-path: path('M5 9 C -1 4, -1 -1, 5 -1 C 11 -1, 11 4, 5 9 Z'); width:14px; height:12px; }
+  @keyframes blink{ 50%{opacity:0.15} }
+  #soundBtn{ background:transparent; border:1px solid var(--static); color:inherit; font-family:'VT323',monospace;
+    font-size:15px; padding:3px 9px; border-radius:2px; cursor:pointer; }
+
+  #subhud{ position:absolute; top:44px; left:16px; right:16px; z-index:60; display:none; gap:14px; align-items:center; }
+  #subhud.on{ display:flex; }
+  #tensionWrap{ flex:1; height:6px; background:#1c1c22; border-radius:4px; overflow:hidden; }
+  #tensionBar{ height:100%; width:0%; background:var(--teal); transition:width 0.5s ease, background 0.5s ease; }
+  #inv{ display:flex; gap:6px; }
+  .invSlot{ width:22px; height:22px; border-radius:50%; border:1px solid var(--static); font-size:12px;
+    display:flex; align-items:center; justify-content:center; color:var(--static); }
+  .invSlot.filled{ border-color:var(--teal); color:var(--teal); background:rgba(46,230,168,0.08); }
+
+  #stage{ flex:1; position:relative; z-index:10; display:flex; flex-direction:column; justify-content:flex-end;
+    padding:100px 20px 26px; overflow:hidden; }
+
+  .flavor{ font-family:'Special Elite', monospace; font-size:15px; line-height:1.7; color:#c9c4b6; max-width:560px;
+    margin:0 auto 14px; text-align:left; opacity:0; animation:fadeIn 1.1s ease forwards; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)} }
+
+  .title-wrap{ margin:auto; text-align:center; }
+  .eyebrow{ font-family:'VT323',monospace; letter-spacing:3px; color:var(--static); font-size:13px; margin-bottom:10px; padding:0 10px;}
+  h1.glitch{ font-family:'Special Elite', monospace; font-size:clamp(32px,9vw,54px); color:var(--cream); margin:0;
+    letter-spacing:2px; text-shadow: 2px 0 var(--red), -2px 0 var(--teal); animation:glitchshift 4s infinite; }
+  @keyframes glitchshift{ 0%,92%,100%{ text-shadow:2px 0 var(--red), -2px 0 var(--teal); transform:translate(0,0);}
+    93%{ text-shadow:-3px 0 var(--red), 3px 0 var(--teal); transform:translate(-1px,1px);}
+    95%{ text-shadow:3px 0 var(--teal), -3px 0 var(--red); transform:translate(1px,-1px);} }
+  .subline{ font-family:'VT323',monospace; color:var(--static); font-size:16px; margin-top:14px; }
+
+  .choices, .hotspots{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin:14px auto; max-width:560px; }
+  .hotspot{ border:1px solid var(--static); background:rgba(255,255,255,0.02); color:var(--cream);
+    font-family:'VT323',monospace; font-size:18px; padding:9px 15px; cursor:pointer; letter-spacing:1px;
+    border-radius:2px; transition:all 0.2s ease; }
+  .hotspot:active{ transform:scale(0.96); }
+  .hotspot.done{ color:var(--teal); border-color:var(--teal); opacity:0.55; }
+  .hotspot.item{ border-color:var(--amber); }
+
+  .thread{ max-width:520px; margin:0 auto; width:100%; display:flex; flex-direction:column; gap:8px; }
+  .bubble{ align-self:flex-start; background:#1c1c24; border:1px solid #2a2a33; padding:10px 14px; border-radius:3px;
+    font-family:'VT323',monospace; font-size:19px; color:var(--cream); max-width:82%; opacity:0; animation:fadeIn 0.5s ease forwards; }
+  .bubble.signed{ border-color:var(--amber); color:var(--amber); }
+
+  .roomArt{ position:relative; width:100%; max-width:560px; margin:0 auto 10px; height:34vh; min-height:170px;
+    border-radius:4px; overflow:hidden; border:1px solid #222; touch-action:none; }
+  .roomArt .sign{ position:absolute; top:14px; left:50%; transform:translateX(-50%); font-family:'Special Elite',monospace;
+    font-size:15px; letter-spacing:4px; color:var(--red); text-shadow:0 0 10px rgba(138,31,43,0.9), 0 0 22px rgba(138,31,43,0.5);
+    animation: signFlicker 3.4s infinite; z-index:2; }
+  @keyframes signFlicker{ 0%,89%,100%{opacity:1} 90%{opacity:0.2} 92%{opacity:1} 94%{opacity:0.3} 96%{opacity:1} }
+  .room-balcao{ background:linear-gradient(180deg,#0d0d13 0%, #16151c 55%, #1c1712 100%); }
+  .room-balcao .case{ position:absolute; bottom:0; left:8%; right:8%; height:38%; border-radius:6px 6px 0 0;
+    background:linear-gradient(180deg, rgba(244,184,96,0.10), rgba(244,184,96,0.02));
+    border:1px solid rgba(244,184,96,0.25); box-shadow: inset 0 0 30px rgba(244,184,96,0.08); }
+  .room-cozinha{ background:linear-gradient(180deg,#100c0a 0%, #16110d 60%, #1a1310 100%); }
+  .room-cozinha .oven{ position:absolute; bottom:10%; left:50%; transform:translateX(-50%); width:70px; height:70px;
+    border-radius:50%; background:radial-gradient(circle, rgba(244,120,60,0.35), rgba(244,120,60,0) 70%);
+    animation: ovenGlow 2.6s ease-in-out infinite; }
+  @keyframes ovenGlow{ 50%{ opacity:0.5 } }
+  .room-deposito{ background:#050506; }
+  .room-deposito .bulb{ position:absolute; top:6%; left:50%; width:2px; height:22%; background:#3a3a42; transform-origin:top center;
+    animation: swing 3s ease-in-out infinite; z-index:1; }
+  .room-deposito .bulb::after{ content:""; position:absolute; bottom:-8px; left:-7px; width:16px; height:16px; border-radius:50%;
+    background:radial-gradient(circle, var(--amber), rgba(244,184,96,0.05) 70%); box-shadow:0 0 24px rgba(244,184,96,0.5); }
+  @keyframes swing{ 0%,100%{ transform:rotate(-4deg);} 50%{ transform:rotate(4deg);} }
+  .room-deposito .shelf{ position:absolute; left:6%; right:6%; height:2px; background:#26262c; z-index:1; }
+  .spotMask{ position:absolute; inset:0; z-index:3; background: radial-gradient(circle at 50% 55%, transparent 55px, rgba(0,0,0,0.95) 130px); }
+  .torchHint{ position:absolute; bottom:6px; left:0; right:0; z-index:4; text-align:center; font-family:'VT323',monospace;
+    font-size:13px; color:var(--static); }
+
+  .navRow{ display:flex; gap:10px; justify-content:center; margin-bottom:10px; flex-wrap:wrap; }
+  .navBtn{ font-family:'VT323',monospace; font-size:16px; letter-spacing:1px; background:transparent;
+    border:1px solid var(--static); color:var(--cream); padding:7px 14px; border-radius:2px; cursor:pointer; }
+
+  #advance{ position:absolute; bottom:0; left:0; right:0; z-index:70; padding:16px 20px 26px; display:flex; justify-content:center;
+    background:linear-gradient(to top, rgba(0,0,0,0.6), transparent); }
+  button.next{ font-family:'VT323',monospace; font-size:20px; letter-spacing:2px; background:transparent; border:1px solid var(--teal);
+    color:var(--teal); padding:10px 26px; cursor:pointer; border-radius:2px; animation:pulseBtn 1.8s ease-in-out infinite; }
+  button.next.warm{ border-color:var(--amber); color:var(--amber); }
+  @keyframes pulseBtn{ 50%{ box-shadow:0 0 14px rgba(46,230,168,0.35);} }
+
+  .flash{ position:fixed; inset:0; background:#fff; z-index:90; opacity:0; pointer-events:none; }
+  .flash.go{ animation:flashfx 0.35s steps(2); }
+  @keyframes flashfx{ 0%{opacity:0} 30%{opacity:0.9} 60%{opacity:0} 100%{opacity:0}}
+  .blackout{ position:fixed; inset:0; background:#000; z-index:80; opacity:0; pointer-events:none; transition:opacity 0.6s ease; }
+  .blackout.on{ opacity:1; }
+
+  #stage.warm{ background:radial-gradient(ellipse at center, #1a130c 0%, #0b0906 100%); }
+  .letter{ max-width:540px; margin:auto; text-align:center; font-family:'Cormorant Garamond', serif; color:var(--cream); }
+  .letter .kicker{ font-family:'VT323',monospace; color:var(--amber); letter-spacing:3px; font-size:13px; margin-bottom:14px;}
+  .letter h2{ font-size:clamp(24px,7vw,38px); font-weight:600; margin:0 0 16px; color:var(--amber); }
+  .letter p{ font-size:clamp(16px,4.2vw,20px); line-height:1.75; font-style:italic; margin:0 0 14px; }
+  .sign{ margin-top:20px; font-size:19px; color:var(--amber); }
+  .restart{ margin-top:24px; background:transparent; border:1px solid var(--static); color:var(--static);
+    font-family:'VT323',monospace; font-size:14px; padding:7px 16px; cursor:pointer; border-radius:2px; }
+
+  .gallery{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; max-width:540px; margin:0 auto 8px; }
+  .card{ width:150px; min-height:110px; border:1px solid rgba(244,184,96,0.35); border-radius:4px; padding:12px;
+    background:rgba(244,184,96,0.04); cursor:pointer; font-family:'VT323',monospace; color:var(--amber); font-size:16px;
+    display:flex; align-items:center; justify-content:center; text-align:center; transition:all 0.25s ease; }
+  .card.flipped{ background:rgba(244,184,96,0.10); }
+  .card .back{ display:none; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:15px; line-height:1.5; color:var(--cream); }
+  .card.flipped .front{ display:none; }
+  .card.flipped .back{ display:block; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="grain"></div>
+  <div id="hud">
+    <div id="rec"><div id="rec-dot"></div><span>REC</span></div>
+    <div id="timecode">00:00:00</div>
+    <button id="soundBtn">🔇 chuva</button>
+  </div>
+  <div id="subhud">
+    <div id="tensionWrap"><div id="tensionBar"></div></div>
+    <div id="inv">
+      <div class="invSlot" id="slot-bilhete">✎</div>
+      <div class="invSlot" id="slot-lanterna">🔦</div>
+      <div class="invSlot" id="slot-controle">📺</div>
+    </div>
+  </div>
+  <div id="stage"></div>
+  <div id="advance"></div>
+  <div class="flash" id="flash"></div>
+  <div class="blackout" id="blackout"></div>
+</div>
+
+<script>
+const app = document.getElementById('app');
+const stage = document.getElementById('stage');
+const advance = document.getElementById('advance');
+const hud = document.getElementById('hud');
+const subhud = document.getElementById('subhud');
+const recDot = document.getElementById('rec-dot');
+const timecodeEl = document.getElementById('timecode');
+const flashEl = document.getElementById('flash');
+const blackoutEl = document.getElementById('blackout');
+const tensionBar = document.getElementById('tensionBar');
+const soundBtn = document.getElementById('soundBtn');
+
+let seconds = 0;
+let ticking = setInterval(()=>{
+  seconds++;
+  const h = String(Math.floor(seconds/3600)).padStart(2,'0');
+  const m = String(Math.floor((seconds%3600)/60)).padStart(2,'0');
+  const s = String(seconds%60).padStart(2,'0');
+  timecodeEl.textContent = `${h}:${m}:${s}`;
+}, 1000);
+
+const state = { tension: 0, inventory: [] };
+
+/* ---------- optional synthesized rain sound (no external files) ---------- */
+let audioCtx=null, rainNode=null, rainGain=null, soundOn=false;
+function toggleSound(){
+  if(!soundOn){
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+
+      const bufSize = 5*audioCtx.sampleRate;
+      const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+      const data = buf.getChannelData(0);
+      let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+      for(let i=0;i<bufSize;i++){
+        const white = Math.random()*2-1;
+        b0 = 0.99886*b0 + white*0.0555179;
+        b1 = 0.99332*b1 + white*0.0750759;
+        b2 = 0.96900*b2 + white*0.1538520;
+        b3 = 0.86650*b3 + white*0.3104856;
+        b4 = 0.55000*b4 + white*0.5329522;
+        b5 = -0.7616*b5  - white*0.0168980;
+        let pink = b0+b1+b2+b3+b4+b5+b6+white*0.5362;
+        b6 = white*0.115926;
+        data[i] = pink * 0.09;
+      }
+      rainNode = audioCtx.createBufferSource();
+      rainNode.buffer = buf; rainNode.loop = true;
+
+      const hp = audioCtx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value = 250;
+      const lp = audioCtx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = 3200;
+      rainGain = audioCtx.createGain(); rainGain.gain.value = 0.16;
+
+      rainNode.connect(hp).connect(lp).connect(rainGain).connect(audioCtx.destination);
+      rainNode.start();
+
+      soundOn = true; soundBtn.textContent = '🔊 chuva';
+    }catch(e){ soundOn = false; }
+  } else {
+    try{ rainNode.stop(); }catch(e){}
+    soundOn = false; soundBtn.textContent = '🔇 chuva';
+  }
+}
+soundBtn.onclick = toggleSound;
+
+function setTension(v){
+  state.tension = Math.max(0, Math.min(100, v));
+  tensionBar.style.width = state.tension + '%';
+  const c = state.tension > 70 ? 'var(--red)' : state.tension > 35 ? '#c98a3a' : 'var(--teal)';
+  tensionBar.style.background = c;
+  if(rainGain) rainGain.gain.value = 0.13 + (state.tension/100)*0.07;
+}
+
+function collect(id){
+  if(!state.inventory.includes(id)){
+    state.inventory.push(id);
+    const slot = document.getElementById('slot-'+id);
+    if(slot) slot.classList.add('filled');
+  }
+}
+function has(id){ return state.inventory.includes(id); }
+
+function goWarm(){
+  hud.classList.add('warm');
+  recDot.classList.add('heart');
+  stage.classList.add('warm');
+  app.classList.add('warm');
+  subhud.classList.remove('on');
+  clearInterval(ticking);
+  timecodeEl.textContent = "PARA SEMPRE";
+  if(rainGain){ try{ rainGain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime+2.5); }catch(e){} }
+}
+
+function jumpFlash(cb){
+  flashEl.classList.add('go');
+  app.classList.add('shake');
+  setTimeout(()=>{ flashEl.classList.remove('go'); app.classList.remove('shake'); if(cb) cb(); }, 380);
+}
+function blackout(ms, cb){
+  blackoutEl.classList.add('on');
+  setTimeout(()=>{ blackoutEl.classList.remove('on'); if(cb) cb(); }, ms);
+}
+function setAdvance(label, onClick, warm=false){
+  advance.innerHTML = '';
+  if(!label) return;
+  const btn = document.createElement('button');
+  btn.className = 'next' + (warm ? ' warm' : '');
+  btn.textContent = label;
+  btn.onclick = onClick;
+  advance.appendChild(btn);
+}
+function clearAdvance(){ advance.innerHTML = ''; }
+function flavor(text, delay=0){
+  const p = document.createElement('p');
+  p.className = 'flavor'; p.textContent = text; p.style.animationDelay = delay + 's';
+  stage.appendChild(p);
+}
+function bubble(text, opts={}){
+  const b = document.createElement('div');
+  b.className = 'bubble' + (opts.signed ? ' signed' : '');
+  b.textContent = text; b.style.animationDelay = (opts.delay || 0) + 's';
+  return b;
+}
+
+let sceneIndex = 0;
+function next(){ sceneIndex++; render(); }
+function render(){ clearAdvance(); stage.innerHTML=''; scenes[sceneIndex](); }
+
+const scenes = [
+
+  // 0 — TITLE (anônimo, no estilo de antologia de terror)
+  function(){
+    const wrap = document.createElement('div');
+    wrap.className = 'title-wrap';
+    wrap.innerHTML = `
+      <div class="eyebrow">BASEADO EM UMA HISTÓRIA REAL ENVIADA POR UMA JOGADORA</div>
+      <h1 class="glitch">TURNO DA NOITE</h1>
+      <div class="subline">um episódio de ARKO EROS, antologia de terror</div>
+    `;
+    stage.appendChild(wrap);
+    setAdvance('TOQUE PARA COMEÇAR', next);
+  },
+
+  // 1 — INTRO (tela própria)
+  function(){
+    flavor('23h47. A loja fechou há uma hora, mas ainda tem coisa pra guardar. Ela decide ficar só mais um pouco. Sozinha.');
+    setAdvance('continuar', next);
+  },
+
+  // 2 — CELULAR VIBRA + escolha (tela própria)
+  function(){
+    flavor('O celular vibra em cima do balcão. Número desconhecido: "sei que você tá aí sozinha."');
+    const ch = document.createElement('div');
+    ch.className = 'choices';
+    const b1 = document.createElement('div'); b1.className='hotspot'; b1.textContent='ignorar e continuar';
+    const b2 = document.createElement('div'); b2.className='hotspot'; b2.textContent='responder "quem é?"';
+    b1.onclick = ()=>{ choiceMade = 'ignorar'; next(); };
+    b2.onclick = ()=>{ choiceMade = 'responder'; next(); };
+    ch.appendChild(b1); ch.appendChild(b2);
+    stage.appendChild(ch);
+  },
+
+  // 3 — REAÇÃO (tela própria, texto nunca fica escondido)
+  function(){
+    if(choiceMade === 'responder'){
+      setTension(20);
+      flavor('Você digita "quem é?". A mensagem fica ali, marcada como lida, sem resposta nenhuma.');
+    } else {
+      setTension(15);
+      flavor('Você guarda o celular no bolso. Sem resposta. Melhor assim, você pensa.');
+    }
+    setAdvance('fechar tudo com calma', next);
+  },
+
+  // 4 — EXPLORE PHASE
+  function(){ startExplore(); },
+
+  // 5 — THE TURN
+  function(){
+    const thread = document.createElement('div');
+    thread.className = 'thread';
+    stage.appendChild(thread);
+    const msgs = [
+      {text:'calma.', delay:0.2},
+      {text:'não é bicho, não é ladrão, não é nada disso', delay:1.0},
+      {text:'é só uma pessoa que queria uma desculpa boa pra fazer você prestar atenção hoje', delay:1.9},
+      {text:'lembra dos três objetos que você achou? guarda eles na cabeça um segundo', delay:2.9},
+      {text:'é a Dani 💛', delay:3.9, signed:true},
+    ];
+    msgs.forEach(m=>{ thread.appendChild(bubble(m.text, m)); });
+    setTimeout(()=>{ setAdvance('...', ()=>{ goWarm(); next(); }, true); }, 4900);
+  },
+
+  // 4 — MEMORY GALLERY
+  function(){
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `<div class="letter" style="margin-bottom:6px;"><div class="kicker">O QUE VOCÊ ACHOU HOJE NÃO ERA BEM O QUE PARECIA</div>
+      <p style="margin-bottom:6px;">toque em cada objeto</p></div>`;
+    stage.appendChild(wrap);
+    const gal = document.createElement('div');
+    gal.className = 'gallery';
+    const cards = [
+      {front:'✎ o bilhete', back:'o bilhete é o dia que te chamei pra assistir Fears to Fathom comigo pela primeira vez. você achou que eu tava louca.'},
+      {front:'🔦 a lanterna', back:'a lanterna é a luz que a gente sempre apaga antes de começar. você jura que é mais assustador assim. (é.)'},
+      {front:'📺 o controle', back:'o controle é o que a gente disputa toda vez antes de apertar o play em outro gameplay de terror, juntas, na tv.'},
+    ];
+    cards.forEach(c=>{
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `<div class="front">${c.front}</div><div class="back">${c.back}</div>`;
+      card.onclick = ()=> card.classList.toggle('flipped');
+      gal.appendChild(card);
+    });
+    stage.appendChild(gal);
+    setAdvance('continuar', next, true);
+  },
+
+  // 5 — FINAL LETTER
+  function(){
+    const letter = document.createElement('div');
+    letter.className = 'letter';
+    letter.innerHTML = `
+      <div class="kicker">FIM DO EPISÓDIO. SEM SUSTO NENHUM, PROMETO</div>
+      <h2>era só isso</h2>
+      <p>fui eu que te apresentei aos jogos. foi através de mim que você conheceu Fears to Fathom, e virou isso que é hoje: a gente no sofá, na frente da tv, assistindo gameplay de terror juntas porque a gente ama esse clima.</p>
+      <p>esse episódio é meu jeito de eternizar isso. a nossa versão da nossa própria história, escrita por mim, sobre nós duas.</p>
+      <p>te amo, Kethely. e prefiro te assustar de brincadeira do que te decepcionar de verdade.</p>
+      <div class="sign">Dani</div>
+      <button class="restart" id="restartBtn">assistir de novo</button>
+    `;
+    stage.appendChild(letter);
+    document.getElementById('restartBtn').onclick = ()=>{ location.reload(); };
+  },
+];
+
+/* =========================================================
+   EXPLORE PHASE
+   ========================================================= */
+let currentRoom = 'balcao';
+
+const rooms = {
+  balcao: {
+    label:'balcão', sign:'ARKO EROS', artClass:'room-balcao',
+    art:'<div class="case"></div>',
+    intro:'Você olha em volta do balcão. Os doces ainda brilham atrás do vidro, mesmo com a loja fechada.',
+    hotspots:[
+      {label:'vitrine', give:null, txt:'Os doces continuam intactos. Você nem lembra de ter deixado tão arrumado assim.', t:6},
+      {label:'porta da rua', give:null, txt:'Você confere a porta da rua. Trancada. Óbvio.', t:6},
+      {label:'gaveta do caixa', give:'bilhete', txt:'Um bilhete antigo dentro da gaveta. Letra apertada, quase apagada. Você não lembra de ter escrito isso.', t:10, item:true},
+    ],
+    goTo:{ next:'cozinha' }
+  },
+  cozinha: {
+    label:'cozinha', artClass:'room-cozinha',
+    art:'<div class="oven"></div>',
+    intro:'A cozinha ainda cheira a chocolate quente. O silêncio aqui é mais grosso que na frente.',
+    hotspots:[
+      {label:'fogão', give:null, txt:'O fogão está frio agora. Mas o cheiro de doce continua no ar, forte demais pra ter passado uma hora.', t:6},
+      {label:'janela', give:null, txt:'A janela está embaçada. Você jura que via um vulto, mas quando limpa o vidro com a manga, não tem nada.', t:12, shake:true},
+      {label:'armário', give:'lanterna', txt:'Uma lanterna de emergência, pilha fraca, escondida no fundo do armário.', t:10, item:true},
+    ],
+    goTo:{ prev:'balcao', next:'deposito' }
+  },
+  deposito: {
+    label:'depósito', artClass:'room-deposito', sign:'DEPÓSITO',
+    art:'<div class="bulb"></div><div class="shelf" style="top:30%"></div><div class="shelf" style="top:55%"></div><div class="shelf" style="top:78%"></div>',
+    lockedTxt:'A porta do depósito está emperrada. Falta alguma coisa antes de conseguir abrir, talvez volte e procure melhor nos outros cômodos.',
+    intro:'O depósito é o único cômodo sem luz de emergência funcionando. Só a lâmpada balançando no teto. Arraste o dedo pela tela pra clarear com a lanterna.',
+    hotspots:[
+      {label:'prateleiras', give:null, txt:'As prateleiras balançam um pouco, como se algo tivesse acabado de passar por elas. Só o vento, você repete pra si mesma.', t:14, shake:true},
+      {label:'controle largado', give:'controle', txt:'Um controle remoto largado no chão, ainda com a telinha acesa, como se alguém tivesse acabado de pausar algo.', t:12, item:true},
+    ],
+    goTo:{ prev:'cozinha' },
+    finalAction:{ label:'apertar o interruptor', requires:['bilhete','lanterna','controle'] }
+  }
+};
+
+function isLocked(key){
+  if(key !== 'deposito') return false;
+  return !(has('bilhete') && has('lanterna'));
+}
+
+function startExplore(){
+  subhud.classList.add('on');
+  setTension(10);
+  renderRoom();
+}
+
+function attachTorch(artEl){
+  const mask = document.createElement('div');
+  mask.className = 'spotMask';
+  artEl.appendChild(mask);
+  const hint = document.createElement('div');
+  hint.className = 'torchHint';
+  hint.textContent = 'arraste o dedo pra iluminar';
+  artEl.appendChild(hint);
+  function setPos(clientX, clientY){
+    const rect = artEl.getBoundingClientRect();
+    const x = ((clientX-rect.left)/rect.width)*100;
+    const y = ((clientY-rect.top)/rect.height)*100;
+    mask.style.background = `radial-gradient(circle at ${x}% ${y}%, transparent 55px, rgba(0,0,0,0.95) 130px)`;
+  }
+  artEl.addEventListener('pointerdown', e=>{ setPos(e.clientX, e.clientY); hint.style.opacity='0'; });
+  artEl.addEventListener('pointermove', e=>{ if(e.pressure>0 || e.pointerType==='mouse') setPos(e.clientX, e.clientY); });
+  artEl.addEventListener('touchmove', e=>{
+    if(e.touches && e.touches[0]){ setPos(e.touches[0].clientX, e.touches[0].clientY); hint.style.opacity='0'; }
+  }, {passive:true});
+}
+
+function renderRoom(){
+  clearAdvance();
+  stage.innerHTML = '';
+  const room = rooms[currentRoom];
+  const locked = isLocked(currentRoom);
+
+  const art = document.createElement('div');
+  art.className = 'roomArt ' + room.artClass;
+  art.innerHTML = `<div class="sign">${room.sign || room.label.toUpperCase()}</div>${room.art}`;
+  stage.appendChild(art);
+
+  if(currentRoom === 'deposito' && !locked){
+    attachTorch(art);
+  }
+
+  if(locked){
+    flavor(room.lockedTxt);
+    const nav = document.createElement('div');
+    nav.className = 'navRow';
+    const back = document.createElement('button');
+    back.className = 'navBtn'; back.textContent = '◀ voltar pra ' + rooms[room.goTo.prev].label;
+    back.onclick = ()=>{ currentRoom = room.goTo.prev; renderRoom(); };
+    nav.appendChild(back);
+    stage.appendChild(nav);
+    return;
+  }
+
+  flavor(room.intro);
+
+  const hotWrap = document.createElement('div');
+  hotWrap.className = 'hotspots';
+  room.hotspots.forEach(h=>{
+    const btn = document.createElement('div');
+    const already = h.item && has(h.give);
+    btn.className = 'hotspot' + (h.item ? ' item' : '') + (already ? ' done' : '');
+    btn.textContent = h.label;
+    btn.onclick = ()=>{
+      if(btn.classList.contains('done')) return;
+      btn.classList.add('done');
+      flavor(h.txt);
+      setTension(state.tension + h.t);
+      if(h.give) collect(h.give);
+      if(h.shake){ app.classList.add('shake'); setTimeout(()=>app.classList.remove('shake'), 400); }
+      maybeShowFinalAction();
+    };
+    hotWrap.appendChild(btn);
+  });
+  stage.appendChild(hotWrap);
+
+  const nav = document.createElement('div');
+  nav.className = 'navRow';
+  if(room.goTo.prev){
+    const back = document.createElement('button');
+    back.className = 'navBtn'; back.textContent = '◀ ' + rooms[room.goTo.prev].label;
+    back.onclick = ()=>{ currentRoom = room.goTo.prev; renderRoom(); };
+    nav.appendChild(back);
+  }
+  if(room.goTo.next){
+    const fwd = document.createElement('button');
+    fwd.className = 'navBtn'; fwd.textContent = rooms[room.goTo.next].label + ' ▶';
+    fwd.onclick = ()=>{ currentRoom = room.goTo.next; renderRoom(); };
+    nav.appendChild(fwd);
+  }
+  stage.appendChild(nav);
+
+  maybeShowFinalAction();
+}
+
+function maybeShowFinalAction(){
+  const room = rooms[currentRoom];
+  if(!room.finalAction){ clearAdvance(); return; }
+  const ok = room.finalAction.requires.every(id => has(id));
+  if(ok){
+    setAdvance(room.finalAction.label, ()=>{
+      jumpFlash(()=>{ blackout(1300, ()=>{ subhud.classList.remove('on'); next(); }); });
+    });
+  } else {
+    clearAdvance();
+  }
+}
+
+render();
+</script>
+</body>
+</html>
