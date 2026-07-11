@@ -1,29 +1,388 @@
-const start = document.querySelector("#start");
-const intro = document.querySelector("#intro");
-const scene = document.querySelector("#scene");
+// =========================
+// TURNO DA NOITE
+// by Dani ❤️
+// =========================
 
-start.addEventListener("click", iniciar);
+const scene = document.getElementById("scene");
+const start = document.getElementById("start");
+const time = document.getElementById("time");
 
-function iniciar(){
+let hora = "23:48";
 
-intro.style.opacity="0";
+time.textContent = hora;
 
-setTimeout(()=>{
+start.addEventListener("click", iniciarJogo);
 
-scene.innerHTML=`
+function fadeOut(element) {
+    element.style.transition = "opacity 1s";
+    element.style.opacity = "0";
+}
 
-<div id="opening">
+function fadeIn(element) {
+    element.style.opacity = "0";
+    element.style.transition = "opacity 1s";
 
-<div class="text">
+    requestAnimationFrame(() => {
+        element.style.opacity = "1";
+    });
+}
 
-Esta história foi inspirada em acontecimentos reais.
+function trocarCena(html) {
 
-</div>
+    scene.style.opacity = 0;
 
-</div>
+    setTimeout(() => {
 
-`;
+        scene.innerHTML = html;
 
-},1200);
+        scene.style.opacity = 1;
+
+    },700);
+
+}
+
+function iniciarJogo(){
+
+    fadeOut(document.getElementById("intro"));
+
+    setTimeout(()=>{
+
+        mostrarTelaRec();
+
+    },1200);
+
+}
+
+function mostrarTelaRec(){
+
+    trocarCena(`
+
+        <div class="story">
+
+            <div class="small">
+
+                RECOVERED FOOTAGE
+
+            </div>
+
+            <div class="big">
+
+                Arquivo recuperado
+
+            </div>
+
+            <div class="text">
+
+                Origem desconhecida
+
+            </div>
+
+        </div>
+
+    `);
+
+    setTimeout(mostrarAviso,3000);
+
+}
+
+function mostrarAviso(){
+
+    trocarCena(`
+
+        <div class="story">
+
+            <div class="big">
+
+                Use fones de ouvido
+
+            </div>
+
+            <div class="text">
+
+                Toque na tela para continuar
+
+            </div>
+
+        </div>
+
+    `);
+
+    scene.onclick = ()=>{
+
+        scene.onclick=null;
+
+        mostrarLocal();
+
+    }
+
+}
+
+function mostrarLocal(){
+
+    trocarCena(`
+
+        <div class="story">
+
+            <div class="hour">
+
+                23:48
+
+            </div>
+
+            <div class="big">
+
+                ARKO EROS
+
+            </div>
+
+            <div class="text">
+
+                Confeitaria Artesanal
+
+            </div>
+
+        </div>
+
+    `);
+
+    setTimeout(cenaUm,3500);
+
+}
+
+function cenaUm(){
+
+    trocarCena(`
+
+        <div class="story">
+
+            <div class="textBox">
+
+                A chuva cai sem parar.
+
+                <br><br>
+
+                Você acabou de fechar a ARKO EROS.
+
+                <br><br>
+
+                Falta apenas conferir se tudo está em ordem antes de ir embora.
+
+            </div>
+
+            <div class="continue">
+
+                Toque para continuar
+
+            </div>
+
+        </div>
+
+    `);
+
+    scene.onclick=()=>{
+
+        scene.onclick=null;
+
+        cenaDois();
+
+    }
+
+}
+
+function cenaDois(){
+
+    trocarCena(`
+
+        <div class="story">
+
+            <div class="textBox">
+
+                O cheiro de café ainda está no ar.
+
+                <br><br>
+
+                A chuva bate contra os vidros da fachada.
+
+                <br><br>
+
+                O silêncio parece estranho esta noite.
+
+            </div>
+
+            <div class="continue">
+
+                Continuar
+
+            </div>
+
+        </div>
+
+    `);
+
+    scene.onclick=()=>{
+
+        scene.onclick=null;
+
+        primeiraExploracao();
+
+    }
+
+}
+
+function primeiraExploracao(){
+
+    trocarCena(`
+
+    <div id="room">
+
+        <h1>ARKO EROS</h1>
+
+        <p>
+
+        Escolha um lugar para observar.
+
+        </p>
+
+        <div class="buttons">
+
+            <button onclick="verBalcao()">
+
+                Balcão
+
+            </button>
+
+            <button onclick="verVitrine()">
+
+                Vitrine
+
+            </button>
+
+            <button onclick="verPorta()">
+
+                Porta
+
+            </button>
+
+        </div>
+
+    </div>
+
+    `);
+
+}
+
+function verBalcao(){
+
+    trocarCena(`
+
+        <div class="story">
+
+            <div class="textBox">
+
+                Tudo parece limpo.
+
+                <br><br>
+
+                Você lembra da correria do dia.
+
+                <br><br>
+
+                Ainda existe uma xícara esquecida sobre o balcão.
+
+            </div>
+
+            <div class="continue">
+
+                Voltar
+
+            </div>
+
+        </div>
+
+    `);
+
+    scene.onclick=()=>{
+
+        scene.onclick=null;
+
+        primeiraExploracao();
+
+    }
+
+}
+
+function verVitrine(){
+
+    trocarCena(`
+
+        <div class="story">
+
+            <div class="textBox">
+
+                Restam apenas alguns doces.
+
+                <br><br>
+
+                Amanhã será outro dia cheio.
+
+            </div>
+
+            <div class="continue">
+
+                Voltar
+
+            </div>
+
+        </div>
+
+    `);
+
+    scene.onclick=()=>{
+
+        scene.onclick=null;
+
+        primeiraExploracao();
+
+    }
+
+}
+
+function verPorta(){
+
+    trocarCena(`
+
+        <div class="story">
+
+            <div class="textBox">
+
+                A chuva continua forte.
+
+                <br><br>
+
+                Você verifica a fechadura.
+
+                <br><br>
+
+                Está trancada.
+
+            </div>
+
+            <div class="continue">
+
+                Voltar
+
+            </div>
+
+        </div>
+
+    `);
+
+    scene.onclick=()=>{
+
+        scene.onclick=null;
+
+        primeiraExploracao();
+
+    }
 
 }
