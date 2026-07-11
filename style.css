@@ -439,3 +439,32 @@ max-width:320px;
 }
 
 }
+.phoneButton{
+
+margin-top:40px;
+
+padding:18px 40px;
+
+background:#1d1d1d;
+
+color:white;
+
+border:1px solid #444;
+
+font-size:18px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.phoneButton:hover{
+
+background:#333;
+
+transform:scale(1.05);
+
+}
