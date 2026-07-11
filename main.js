@@ -924,3 +924,324 @@ function revelacao(){
     }
 
 }
+function cartaFinal(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+
+            Para Keth
+
+        </div>
+
+        <div class="letter">
+
+            <p>
+
+            Talvez você tenha pensado que essa história fosse sobre medo.
+
+            </p>
+
+            <br>
+
+            <p>
+
+            Mas nunca foi.
+
+            </p>
+
+            <br>
+
+            <p>
+
+            Ela sempre foi sobre nós.
+
+            </p>
+
+            <br>
+
+            <button class="phoneButton" onclick="carta2()">
+
+                Continuar
+
+            </button>
+
+        </div>
+
+    </div>
+
+    `);
+
+}
+
+function carta2(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="letter">
+
+            <p>
+
+            Tudo começou de um jeito completamente aleatório.
+
+            </p>
+
+            <br>
+
+            <p>
+
+            Você me encontrou pelo Instagram.
+
+            </p>
+
+            <br>
+
+            <p>
+
+            Pediu meu contato através de uma amiga.
+
+            </p>
+
+            <br>
+
+            <p>
+
+            E, sem perceber, começou a mudar minha vida.
+
+            </p>
+
+            <br>
+
+            <button class="phoneButton" onclick="carta3()">
+
+                Continuar
+
+            </button>
+
+        </div>
+
+    </div>
+
+    `);
+
+}
+
+function carta3(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="letter">
+
+            <p>
+
+            Durante meses nós apenas conversamos.
+
+            </p>
+
+            <br>
+
+            <p>
+
+            Até que um dia...
+
+            </p>
+
+            <br>
+
+            <p>
+
+            Eu resolvi fazer um convite.
+
+            </p>
+
+            <br>
+
+            <p>
+
+            Um show completamente aleatório da Banda Calypso.
+
+            </p>
+
+            <br>
+
+            <button class="phoneButton" onclick="carta4()">
+
+                Continuar
+
+            </button>
+
+        </div>
+
+    </div>
+
+    `);
+
+}
+
+function carta4(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="letter">
+
+            <p>
+
+            Foi naquele dia que aconteceu nosso primeiro beijo.
+
+            </p>
+
+            <br>
+
+            <p>
+
+            Quem diria que um convite tão improvável mudaria completamente nossas vidas?
+
+            </p>
+
+            <br>
+
+            <button class="phoneButton" onclick="carta5()">
+
+                Continuar
+
+            </button>
+
+        </div>
+
+    </div>
+
+    `);
+
+}
+
+function carta5(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="letter">
+
+            <p>
+
+            Depois vieram tantos momentos...
+
+            </p>
+
+            <br>
+
+            <p>
+
+            Inclusive encontrar o Orion.
+
+            </p>
+
+            <br>
+
+            <p>
+
+            Ele nunca imaginou que faria parte de uma família tão especial.
+
+            </p>
+
+            <br>
+
+            <button class="phoneButton" onclick="carta6()">
+
+                Continuar
+
+            </button>
+
+        </div>
+
+    </div>
+
+    `);
+
+}
+
+function carta6(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="letter">
+
+            <p>
+
+            Obrigado por existir.
+
+            </p>
+
+            <br>
+
+            <p>
+
+            Obrigado por acreditar em mim.
+
+            </p>
+
+            <br>
+
+            <p>
+
+            Obrigado por transformar qualquer lugar em lar.
+
+            </p>
+
+            <br>
+
+            <button class="phoneButton" onclick="fim()">
+
+                Última página
+
+            </button>
+
+        </div>
+
+    </div>
+
+    `);
+
+}
+
+function fim(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+
+            Eu te amo, Keth.
+
+        </div>
+
+        <div class="text">
+
+            ❤️
+
+            <br><br>
+
+            Obrigado por aceitar aquele convite para um show completamente aleatório da Banda Calypso.
+
+            <br><br>
+
+            Fim.
+
+        </div>
+
+    </div>
+
+    `);
+
+}
