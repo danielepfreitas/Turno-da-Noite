@@ -1,72 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Turno da Noite</title>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Special+Elite&display=swap" rel="stylesheet">
-
 <link rel="stylesheet" href="style.css">
-
 </head>
-
 <body>
-
-<div id="game">
-
+  <div id="game">
     <div id="noise"></div>
-
     <div id="fade"></div>
 
     <div id="hud">
-
-        <div id="time">
-            23:48
-        </div>
-
-        <div id="rec">
-            ● REC
-        </div>
-
+      <div id="time">23:48</div>
+      <div id="rec">● REC</div>
     </div>
+
+    <div id="legenda"></div>
+    <div id="prompt"></div>
+    <div id="mira">+</div>
 
     <div id="scene">
-
-        <div id="intro">
-
-            <div class="logo">
-
-                TURNO DA NOITE
-
-            </div>
-
-            <div class="subtitle">
-
-                Um episódio inspirado em jogos de terror psicológico
-
-            </div>
-
-            <div id="start">
-
-                Toque para começar
-
-            </div>
-
-        </div>
-
+      <div id="intro">
+        <div class="logo">TURNO DA NOITE</div>
+        <div class="subtitle">Um episódio inspirado em jogos de terror psicológico</div>
+        <div id="start">Toque para começar</div>
+      </div>
     </div>
 
-</div>
+    <div id="scene3d"></div>
+  </div>
 
-<script src="main.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="chuva.js"></script>
-    <script src="cena3d.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
