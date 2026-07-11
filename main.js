@@ -678,3 +678,208 @@ function deposito(){
     `);
 
 }
+function deposito(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+            Depósito
+        </div>
+
+        <div class="textBox">
+
+            Você empurra lentamente a porta.
+
+            <br><br>
+
+            O cheiro de madeira antiga invade o ambiente.
+
+            <br><br>
+
+            A única lâmpada começa a piscar.
+
+        </div>
+
+        <div class="continue">
+            Entrar
+        </div>
+
+    </div>
+
+    `);
+
+    scene.onclick=()=>{
+
+        scene.onclick=null;
+
+        depositoEscuro();
+
+    }
+
+}
+
+function depositoEscuro(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+            ...
+        </div>
+
+        <div class="textBox">
+
+            Você procura o interruptor.
+
+            <br><br>
+
+            Nada.
+
+            <br><br>
+
+            Só existe o som da chuva.
+
+        </div>
+
+        <div class="continue">
+            Continuar
+        </div>
+
+    </div>
+
+    `);
+
+    scene.onclick=()=>{
+
+        scene.onclick=null;
+
+        brilho();
+
+    }
+
+}
+
+function brilho(){
+
+    document.body.style.background="#050505";
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+            Um brilho.
+        </div>
+
+        <div class="textBox">
+
+            Algo iluminado aparece no fundo do depósito.
+
+            <br><br>
+
+            Parece uma caixa.
+
+        </div>
+
+        <button class="phoneButton" onclick="abrirCaixa()">
+
+            Aproximar
+
+        </button>
+
+    </div>
+
+    `);
+
+}
+
+function abrirCaixa(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+
+            Caixa
+
+        </div>
+
+        <div class="textBox">
+
+            Dentro dela existem algumas lembranças.
+
+            <br><br>
+
+            Uma coleira.
+
+            <br>
+
+            Uma fotografia.
+
+            <br>
+
+            Um ingresso antigo.
+
+        </div>
+
+        <button class="phoneButton" onclick="verIngresso()">
+
+            Ver ingresso
+
+        </button>
+
+    </div>
+
+    `);
+
+}
+
+function verIngresso(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+
+            Ingresso
+
+        </div>
+
+        <div class="textBox">
+
+            Banda Calypso.
+
+            <br><br>
+
+            Você sorri.
+
+            <br><br>
+
+            Tudo começou naquele dia.
+
+        </div>
+
+        <div class="continue">
+
+            Continuar
+
+        </div>
+
+    </div>
+
+    `);
+
+    scene.onclick=()=>{
+
+        scene.onclick=null;
+
+        revelacao();
+
+    }
+
+}
