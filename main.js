@@ -81,7 +81,25 @@ const Chuva = (() => {
     osc.stop(ctx.currentTime + duracao + 0.1);
   }
 
-  return { iniciar, tocarTom, estaTocando: () => tocando };
+  function tocarVibracao() {
+    if (!ctx) return;
+    for (let i = 0; i < 3; i++) {
+      const osc = ctx.createOscillator();
+      osc.type = "square";
+      osc.frequency.value = 165;
+      const g = ctx.createGain();
+      const inicio = ctx.currentTime + i * 0.32;
+      g.gain.setValueAtTime(0, inicio);
+      g.gain.linearRampToValueAtTime(0.06, inicio + 0.02);
+      g.gain.linearRampToValueAtTime(0, inicio + 0.22);
+      osc.connect(g);
+      g.connect(ctx.destination);
+      osc.start(inicio);
+      osc.stop(inicio + 0.24);
+    }
+  }
+
+  return { iniciar, tocarTom, tocarVibracao, estaTocando: () => tocando };
 })();
 
 /* ---------------------------------------------------------------
@@ -95,6 +113,8 @@ const elMira = document.getElementById("mira");
 const elPrompt = document.getElementById("prompt");
 const elLegenda = document.getElementById("legenda");
 const elTime = document.getElementById("time");
+const elCelular = document.getElementById("celular");
+const elFim = document.getElementById("fim");
 
 /* ---------------------------------------------------------------
    3. RELÓGIO DO HUD (avança devagar, clima de "tempo real")
@@ -138,20 +158,24 @@ const PI_2 = Math.PI / 2;
 const VELOCIDADE = 2.6;
 const LIMITES = { x: 3.2, zMin: -12, zMax: 6 };
 const POSICAO_BALCAO = new THREE.Vector3(0, 0, -9);
+const ESCALA_RENDER = 0.5; // menor = mais "pixelado", cara de PS1/VHS
+const ALTURA_JOGADOR = 1.6;
+let tempoBob = 0;
+let finalIniciado = false;
 
 function iniciarCena() {
   scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x05070a, 0.05);
+  scene.fog = new THREE.FogExp2(0x0e0d0a, 0.028);
 
   camera = new THREE.PerspectiveCamera(68, window.innerWidth / window.innerHeight, 0.1, 100);
   camera.position.set(0, 1.6, 4);
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer = new THREE.WebGLRenderer({ antialias: false });
+  renderer.setPixelRatio(1);
+  renderer.setSize(window.innerWidth * ESCALA_RENDER, window.innerHeight * ESCALA_RENDER, false);
   elScene3d.appendChild(renderer.domElement);
 
-  scene.add(new THREE.AmbientLight(0x0c1016, 0.55));
+  scene.add(new THREE.AmbientLight(0x2a2620, 1.0));
 
   criarLoja();
   criarBalcao();
@@ -234,6 +258,13 @@ function criarLoja() {
   const luzJanela = new THREE.PointLight(0x274a5c, 0.5, 6);
   luzJanela.position.set(-2.4, 1.9, -14.5);
   scene.add(luzJanela);
+
+  // luzes de teto acesas — a loja está com a iluminação normal ligada
+  for (let z = -1; z > -14; z -= 4) {
+    const luzTeto = new THREE.PointLight(0xfff0d6, 0.65, 7, 2);
+    luzTeto.position.set(0, 3.1, z);
+    scene.add(luzTeto);
+  }
 }
 
 function criarBalcao() {
@@ -312,13 +343,14 @@ function animarChuva(delta) {
 
 /* ---------------- evento do balcão ---------------- */
 function verificarProximidadeBalcao() {
+  if (finalIniciado) return;
   const dist = camera.position.distanceTo(
     new THREE.Vector3(POSICAO_BALCAO.x, camera.position.y, POSICAO_BALCAO.z)
   );
   const perto = dist < 2.6;
 
   if (perto && !pertoDoBalcao && !balcaoVisitado) {
-    elPrompt.textContent = "PRESSIONE  E  PARA VERIFICAR O BALCÃO";
+    elPrompt.textContent = "PRESSIONE  E  PARA FECHAR A LOJA";
     elPrompt.classList.add("visivel");
   }
   if (!perto && pertoDoBalcao) {
@@ -332,21 +364,46 @@ function ativarEventoBalcao() {
   balcaoVisitado = true;
   elPrompt.classList.remove("visivel");
 
-  Chuva.tocarTom({ freq: 70, duracao: 2.2, volume: 0.1 });
-
-  let piscadas = 0;
-  const intervaloFlick = setInterval(() => {
-    luzLampada.intensity = luzLampada.intensity > 0.3 ? 0.05 : 1.3;
-    piscadas++;
-    if (piscadas > 7) {
-      clearInterval(intervaloFlick);
-      luzLampada.intensity = 0.5;
-    }
-  }, 110);
+  mostrarLegenda("Vou fechar por hoje...", 3200);
 
   setTimeout(() => {
-    mostrarLegenda("O balcão está frio. Alguém esteve aqui antes de você.", 6000);
-  }, 900);
+    // a luz pisca antes da mensagem chegar
+    let piscadas = 0;
+    const intervaloFlick = setInterval(() => {
+      luzLampada.intensity = luzLampada.intensity > 0.3 ? 0.05 : 1.3;
+      piscadas++;
+      if (piscadas > 5) {
+        clearInterval(intervaloFlick);
+        luzLampada.intensity = 0.5;
+      }
+    }, 130);
+    Chuva.tocarTom({ freq: 62, duracao: 1.8, volume: 0.09 });
+  }, 3400);
+
+  setTimeout(() => {
+    mostrarCelular();
+  }, 5600);
+}
+
+function mostrarCelular() {
+  Chuva.tocarVibracao();
+  elCelular.classList.add("visivel");
+
+  setTimeout(() => {
+    finalizarEpisodio();
+  }, 5200);
+}
+
+function finalizarEpisodio() {
+  finalIniciado = true;
+  elFade.classList.add("ativo");
+
+  setTimeout(() => {
+    elCelular.classList.remove("visivel");
+    elScene3d.style.display = "none";
+    elFim.style.display = "flex";
+    elFade.classList.remove("ativo");
+  }, 1300);
 }
 
 /* ---------------- controles ---------------- */
@@ -395,13 +452,18 @@ function moverJogador(delta) {
 
   camera.position.x = Math.max(-LIMITES.x, Math.min(LIMITES.x, camera.position.x));
   camera.position.z = Math.max(LIMITES.zMin, Math.min(LIMITES.zMax, camera.position.z));
-  camera.position.y = 1.6;
+
+  // balanço de câmera tipo filmadora de mão (VHS)
+  const movendo = teclas.w || teclas.a || teclas.s || teclas.d;
+  tempoBob += delta * (movendo ? 7 : 1.3);
+  const bob = movendo ? Math.sin(tempoBob) * 0.035 : Math.sin(tempoBob) * 0.006;
+  camera.position.y = ALTURA_JOGADOR + bob;
 }
 
 function aoRedimensionar() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(window.innerWidth * ESCALA_RENDER, window.innerHeight * ESCALA_RENDER, false);
 }
 
 let ultimoTempo = performance.now();
