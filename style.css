@@ -203,3 +203,239 @@ font-size:15px;
 }
 
 }
+/* ========================= */
+/* SISTEMA DE CENAS */
+/* ========================= */
+
+#scene{
+    transition:opacity .7s ease;
+    position:relative;
+}
+
+.story{
+    width:100%;
+    height:100%;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    padding:40px;
+
+    text-align:center;
+
+    animation:fadeScene 1s;
+}
+
+.story .small{
+
+    font-size:14px;
+
+    color:#888;
+
+    letter-spacing:5px;
+
+    margin-bottom:25px;
+
+}
+
+.story .big{
+
+    font-size:42px;
+
+    font-family:'Special Elite';
+
+    letter-spacing:4px;
+
+    margin-bottom:20px;
+
+}
+
+.story .hour{
+
+    font-size:18px;
+
+    color:#8d8d8d;
+
+    margin-bottom:20px;
+
+}
+
+.story .text{
+
+    color:#bdbdbd;
+
+    line-height:1.8;
+
+    max-width:700px;
+
+}
+
+.textBox{
+
+    max-width:750px;
+
+    line-height:2;
+
+    font-size:20px;
+
+    background:rgba(255,255,255,.04);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:10px;
+
+    padding:30px;
+
+    backdrop-filter:blur(8px);
+
+    animation:fadeScene .8s;
+
+}
+
+.continue{
+
+    margin-top:40px;
+
+    color:#8c8c8c;
+
+    animation:blink 1.4s infinite;
+
+}
+
+#room{
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    height:100%;
+
+    animation:fadeScene .8s;
+
+}
+
+#room h1{
+
+    font-family:'Special Elite';
+
+    font-size:48px;
+
+    margin-bottom:15px;
+
+}
+
+#room p{
+
+    color:#9d9d9d;
+
+    margin-bottom:50px;
+
+}
+
+.buttons{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:20px;
+
+    justify-content:center;
+
+}
+
+.buttons button{
+
+    width:180px;
+
+    padding:18px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#1a1a1a;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:17px;
+
+    transition:.25s;
+
+    border:1px solid #333;
+
+}
+
+.buttons button:hover{
+
+    transform:translateY(-4px);
+
+    background:#272727;
+
+    border-color:#555;
+
+}
+
+@keyframes fadeScene{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(15px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+@media(max-width:700px){
+
+.story .big{
+
+font-size:28px;
+
+}
+
+.textBox{
+
+font-size:16px;
+
+padding:22px;
+
+line-height:1.8;
+
+}
+
+.buttons{
+
+flex-direction:column;
+
+width:100%;
+
+}
+
+.buttons button{
+
+width:100%;
+
+max-width:320px;
+
+}
+
+}
