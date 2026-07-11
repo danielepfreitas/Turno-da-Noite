@@ -386,3 +386,295 @@ function verPorta(){
     }
 
 }
+// ===========================
+// EXPLORAÇÃO DA ARKO EROS
+// ===========================
+
+let locaisVisitados = [];
+
+function registrarLocal(nome){
+
+    if(!locaisVisitados.includes(nome))
+        locaisVisitados.push(nome);
+
+    if(locaisVisitados.length >= 3){
+
+        setTimeout(celularToca,800);
+
+    }
+
+}
+
+function verBalcao(){
+
+    registrarLocal("balcao");
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+
+            Balcão
+
+        </div>
+
+        <div class="textBox">
+
+            Você passa a mão lentamente sobre o balcão.
+
+            <br><br>
+
+            Ainda existe cheiro de café fresco.
+
+            <br><br>
+
+            Uma pequena xícara esquecida parece esperar alguém voltar.
+
+        </div>
+
+        <div class="continue">
+
+            Toque para voltar
+
+        </div>
+
+    </div>
+
+    `);
+
+    scene.onclick=()=>{
+
+        scene.onclick=null;
+
+        primeiraExploracao();
+
+    }
+
+}
+
+function verVitrine(){
+
+    registrarLocal("vitrine");
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+
+            Vitrine
+
+        </div>
+
+        <div class="textBox">
+
+            Restaram poucos doces.
+
+            <br><br>
+
+            Você sorri lembrando de todos que passaram por aqui hoje.
+
+            <br><br>
+
+            Amanhã haverá mais histórias.
+
+        </div>
+
+        <div class="continue">
+
+            Toque para voltar
+
+        </div>
+
+    </div>
+
+    `);
+
+    scene.onclick=()=>{
+
+        scene.onclick=null;
+
+        primeiraExploracao();
+
+    }
+
+}
+
+function verPorta(){
+
+    registrarLocal("porta");
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+
+            Porta
+
+        </div>
+
+        <div class="textBox">
+
+            A chuva continua caindo.
+
+            <br><br>
+
+            A rua está completamente vazia.
+
+            <br><br>
+
+            Você confere a fechadura.
+
+            Está tudo certo.
+
+        </div>
+
+        <div class="continue">
+
+            Toque para voltar
+
+        </div>
+
+    </div>
+
+    `);
+
+    scene.onclick=()=>{
+
+        scene.onclick=null;
+
+        primeiraExploracao();
+
+    }
+
+}
+
+function celularToca(){
+
+    scene.onclick=null;
+
+    if(navigator.vibrate){
+
+        navigator.vibrate([300,150,300]);
+
+    }
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+
+            📱
+
+        </div>
+
+        <div class="textBox">
+
+            Seu celular vibra.
+
+            <br><br>
+
+            Existe apenas uma mensagem.
+
+        </div>
+
+        <button class="phoneButton" onclick="abrirMensagem()">
+
+            Abrir mensagem
+
+        </button>
+
+    </div>
+
+    `);
+
+}
+
+function abrirMensagem(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+
+            Mensagem
+
+        </div>
+
+        <div class="textBox">
+
+            "Você esqueceu uma coisa."
+
+            <br><br>
+
+            Nenhum número.
+
+            <br><br>
+
+            Nenhum nome.
+
+        </div>
+
+        <div class="continue">
+
+            Toque para continuar
+
+        </div>
+
+    </div>
+
+    `);
+
+    scene.onclick=()=>{
+
+        scene.onclick=null;
+
+        deposito();
+
+    }
+
+}
+
+function deposito(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+
+            Depósito
+
+        </div>
+
+        <div class="textBox">
+
+            Você caminha até o depósito.
+
+            <br><br>
+
+            As luzes piscam.
+
+            <br><br>
+
+            Pela primeira vez...
+
+            Você sente que não está sozinha.
+
+        </div>
+
+        <div class="continue">
+
+            Continuar
+
+        </div>
+
+    </div>
+
+    `);
+
+}
