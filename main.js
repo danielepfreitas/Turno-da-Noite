@@ -883,3 +883,44 @@ function verIngresso(){
     }
 
 }
+function revelacao(){
+
+    trocarCena(`
+
+    <div class="story">
+
+        <div class="big">
+
+            Não era sobre medo.
+
+        </div>
+
+        <div class="textBox">
+
+            Durante toda essa noite...
+
+            <br><br>
+
+            Você estava caminhando pelas lembranças da nossa história.
+
+        </div>
+
+        <div class="continue">
+
+            Continuar
+
+        </div>
+
+    </div>
+
+    `);
+
+    scene.onclick=()=>{
+
+        scene.onclick=null;
+
+        cartaFinal();
+
+    }
+
+}
