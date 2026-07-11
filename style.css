@@ -468,3 +468,42 @@ background:#333;
 transform:scale(1.05);
 
 }
+.letter{
+
+max-width:750px;
+
+background:rgba(255,255,255,.05);
+
+border:1px solid rgba(255,255,255,.12);
+
+padding:40px;
+
+border-radius:10px;
+
+line-height:2;
+
+font-size:20px;
+
+text-align:left;
+
+animation:fadeScene .8s;
+
+}
+
+.letter p{
+
+margin:0;
+
+}
+
+@media(max-width:700px){
+
+.letter{
+
+font-size:16px;
+
+padding:25px;
+
+}
+
+}
