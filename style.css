@@ -968,3 +968,13 @@ color:#9d9d9d;
 letter-spacing:2px;
 
 }
+#scene3d {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  cursor: crosshair;
+}
+#scene3d canvas {
+  display: block;
+}
