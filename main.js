@@ -1372,3 +1372,76 @@ setInterval(()=>{
     }
 
 },5000);
+// ==========================
+// INVENTÁRIO
+// ==========================
+
+const inventario=[];
+
+function adicionarItem(nome,icone){
+
+    if(inventario.find(i=>i.nome===nome)) return;
+
+    inventario.push({
+
+        nome,
+
+        icone
+
+    });
+
+    atualizarInventario();
+
+}
+
+function atualizarInventario(){
+
+    let inv=document.getElementById("inventory");
+
+    if(!inv){
+
+        inv=document.createElement("div");
+
+        inv.id="inventory";
+
+        document.getElementById("game").appendChild(inv);
+
+    }
+
+    inv.innerHTML="";
+
+    inventario.forEach(item=>{
+
+        const div=document.createElement("div");
+
+        div.className="item novo";
+
+        div.innerHTML=item.icone;
+
+        div.title=item.nome;
+
+        inv.appendChild(div);
+
+    });
+
+}
+
+function atualizarProgresso(){
+
+    let progresso=document.getElementById("progress");
+
+    if(!progresso){
+
+        progresso=document.createElement("div");
+
+        progresso.id="progress";
+
+        document.getElementById("game").appendChild(progresso);
+
+    }
+
+    progresso.innerHTML=
+
+    "Lembranças encontradas: "+inventario.length+"/4";
+
+}
