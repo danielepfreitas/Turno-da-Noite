@@ -1245,3 +1245,101 @@ function fim(){
     `);
 
 }
+// ==========================
+// EFEITO MÁQUINA DE ESCREVER
+// ==========================
+
+function escreverTexto(elemento, texto, velocidade = 28){
+
+    elemento.innerHTML = "";
+
+    let i = 0;
+
+    const timer = setInterval(()=>{
+
+        elemento.innerHTML += texto.charAt(i);
+
+        i++;
+
+        if(i >= texto.length){
+
+            clearInterval(timer);
+
+        }
+
+    }, velocidade);
+
+}
+
+// ==========================
+// SOM DE CHUVA
+// ==========================
+
+const chuva = new Audio("assets/audio/rain.mp3");
+
+chuva.loop = true;
+
+chuva.volume = 0.18;
+
+document.body.addEventListener("click", ()=>{
+
+    chuva.play().catch(()=>{});
+
+},{once:true});
+
+
+// ==========================
+// CRÉDITOS
+// ==========================
+
+function creditos(){
+
+trocarCena(`
+
+<div class="story">
+
+<div class="big">
+
+Obrigado por jogar.
+
+</div>
+
+<div class="letter">
+
+<p>
+
+Criado com muito amor.
+
+</p>
+
+<br>
+
+<p>
+
+Para a pessoa mais importante da minha vida.
+
+</p>
+
+<br>
+
+<p>
+
+Keth ❤️
+
+</p>
+
+<br><br>
+
+<p style="text-align:center;color:#888">
+
+Turno da Noite
+
+</p>
+
+</div>
+
+</div>
+
+`);
+
+}
