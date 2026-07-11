@@ -1626,3 +1626,66 @@ escolhas.abrirCaixa=true;
 revelacaoFinal();
 
 }
+function revelacaoFinal(){
+
+trocarCena(`
+
+<div class="story">
+
+<div class="big">
+
+Dentro da caixa...
+
+</div>
+
+<div class="textBox" id="typing">
+
+</div>
+
+</div>
+
+`);
+
+const texto=`
+
+Não havia monstros.
+
+Não havia fantasmas.
+
+Só lembranças.
+
+Cada objeto encontrado...
+
+era um pedaço da nossa história.
+
+`;
+
+setTimeout(()=>{
+
+escreverTexto(
+
+document.getElementById("typing"),
+
+texto,
+
+35
+
+);
+
+},500);
+
+setTimeout(()=>{
+
+const btn=document.createElement("button");
+
+btn.className="phoneButton";
+
+btn.innerHTML="Continuar";
+
+btn.onclick=cartaFinal;
+
+document.querySelector(".story").appendChild(btn);
+
+},8500);
+
+}
