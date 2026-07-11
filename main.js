@@ -1445,3 +1445,184 @@ function atualizarProgresso(){
     "Lembranças encontradas: "+inventario.length+"/4";
 
 }
+// ====================================
+// SISTEMA DE ESCOLHAS
+// ====================================
+
+let escolhas = {
+    desligarLuzes:false,
+    olharCelular:false,
+    abrirCaixa:false
+};
+
+function escolhaDeposito(){
+
+trocarCena(`
+
+<div class="story">
+
+<div class="big">
+
+Você escuta um estalo.
+
+</div>
+
+<div class="textBox">
+
+A lâmpada começa a piscar.
+
+<br><br>
+
+O que você faz?
+
+</div>
+
+<div class="buttons">
+
+<button onclick="desligarLuz()">
+
+Desligar a energia
+
+</button>
+
+<button onclick="olharCelular()">
+
+Olhar o celular
+
+</button>
+
+</div>
+
+</div>
+
+`);
+
+}
+
+function desligarLuz(){
+
+escolhas.desligarLuzes=true;
+
+trocarCena(`
+
+<div class="story">
+
+<div class="textBox">
+
+Você respira fundo.
+
+<br><br>
+
+O silêncio fica ainda maior.
+
+<br><br>
+
+Agora só existe a chuva.
+
+</div>
+
+<div class="continue">
+
+Continuar
+
+</div>
+
+</div>
+
+`);
+
+scene.onclick=()=>{
+
+scene.onclick=null;
+
+caixaMisteriosa();
+
+}
+
+}
+
+function olharCelular(){
+
+escolhas.olharCelular=true;
+
+trocarCena(`
+
+<div class="story">
+
+<div class="textBox">
+
+A tela acende sozinha.
+
+<br><br>
+
+Nova mensagem.
+
+<br><br>
+
+"Continue."
+
+</div>
+
+<div class="continue">
+
+Continuar
+
+</div>
+
+</div>
+
+`);
+
+scene.onclick=()=>{
+
+scene.onclick=null;
+
+caixaMisteriosa();
+
+}
+
+}
+
+function caixaMisteriosa(){
+
+trocarCena(`
+
+<div class="story">
+
+<div class="big">
+
+Uma caixa.
+
+</div>
+
+<div class="textBox">
+
+Ela estava aqui o tempo todo.
+
+<br><br>
+
+Mas você tem certeza de que ela não estava aqui quando entrou.
+
+</div>
+
+<button class="phoneButton"
+
+onclick="abrirCaixaFinal()">
+
+Abrir
+
+</button>
+
+</div>
+
+`);
+
+}
+
+function abrirCaixaFinal(){
+
+escolhas.abrirCaixa=true;
+
+revelacaoFinal();
+
+}
