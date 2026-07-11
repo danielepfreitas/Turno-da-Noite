@@ -1343,3 +1343,32 @@ Turno da Noite
 `);
 
 }
+// ===========================
+// EFEITOS
+// ===========================
+
+function relampago(){
+
+    const game=document.getElementById("game");
+
+    game.classList.add("flash");
+
+    setTimeout(()=>{
+
+        game.classList.remove("flash");
+
+    },250);
+
+}
+
+setInterval(()=>{
+
+    const chance=Math.random();
+
+    if(chance>.93){
+
+        relampago();
+
+    }
+
+},5000);
