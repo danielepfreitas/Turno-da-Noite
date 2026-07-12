@@ -26,7 +26,7 @@ const Chuva = (() => {
     return buffer;
   }
 
-  function iniciar({ volume = 0.16 } = {}) {
+  function iniciar({ volume = 0.11 } = {}) {
     ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
     if (ctx.state === "suspended") ctx.resume();
     if (tocando) return;
@@ -35,28 +35,31 @@ const Chuva = (() => {
     fonteRuido.buffer = criarBufferRuido(ctx);
     fonteRuido.loop = true;
 
-    const passaFaixa = ctx.createBiquadFilter();
-    passaFaixa.type = "bandpass";
-    passaFaixa.frequency.value = 2200;
-    passaFaixa.Q.value = 0.6;
+    // dois filtros passa-baixa em cascata em vez de bandpass —
+    // dá um "shhh" mais macio de chuva fraca, sem chiado agudo
+    const passaBaixa1 = ctx.createBiquadFilter();
+    passaBaixa1.type = "lowpass";
+    passaBaixa1.frequency.value = 900;
+    passaBaixa1.Q.value = 0.35;
 
-    const passaBaixa = ctx.createBiquadFilter();
-    passaBaixa.type = "lowpass";
-    passaBaixa.frequency.value = 3200;
+    const passaBaixa2 = ctx.createBiquadFilter();
+    passaBaixa2.type = "lowpass";
+    passaBaixa2.frequency.value = 1500;
+    passaBaixa2.Q.value = 0.2;
 
     lfo = ctx.createOscillator();
-    lfo.frequency.value = 0.1;
+    lfo.frequency.value = 0.08;
     const lfoGain = ctx.createGain();
-    lfoGain.gain.value = 0.05;
+    lfoGain.gain.value = 0.025;
     lfo.connect(lfoGain);
 
     gainMestre = ctx.createGain();
     gainMestre.gain.value = 0;
     lfoGain.connect(gainMestre.gain);
 
-    fonteRuido.connect(passaFaixa);
-    passaFaixa.connect(passaBaixa);
-    passaBaixa.connect(gainMestre);
+    fonteRuido.connect(passaBaixa1);
+    passaBaixa1.connect(passaBaixa2);
+    passaBaixa2.connect(gainMestre);
     gainMestre.connect(ctx.destination);
 
     fonteRuido.start(0);
@@ -163,6 +166,8 @@ const elScene3d = document.getElementById("scene3d");
 const elFade = document.getElementById("fade");
 const elMira = document.getElementById("mira");
 const elPrompt = document.getElementById("prompt");
+const elPromptTexto = document.getElementById("prompt-texto");
+const elPromptBarra = document.getElementById("prompt-barra-preenchimento");
 const elLegenda = document.getElementById("legenda");
 const elTime = document.getElementById("time");
 const elCartaoPreto = document.getElementById("cartao-preto");
@@ -295,6 +300,9 @@ const ALTURA_JOGADOR = 1.6;
 let tempoBob = 0;
 
 let pontoAtual = null; // { pos, texto, aoAcionar }
+let segurando = false;
+let tempoSegurando = 0;
+const DURACAO_SEGURAR = 0.9;
 
 function iniciarCena() {
   scene = new THREE.Scene();
@@ -503,37 +511,47 @@ function criarVulto() {
   vulto = g;
 }
 
-/* ---------------- ponto de interação genérico ---------------- */
+/* ---------------- ponto de interação genérico (segurar / toque) ---------------- */
 function definirPonto(pos, texto, aoAcionar) {
   pontoAtual = { pos, texto, aoAcionar, perto: false };
 }
 
 function limparPonto() {
   pontoAtual = null;
+  segurando = false;
+  tempoSegurando = 0;
+  elPromptBarra.style.width = "0%";
   elPrompt.classList.remove("visivel");
 }
 
-function verificarPonto() {
+function verificarPonto(delta) {
   if (!pontoAtual) return;
   const dist = camera.position.distanceTo(
     new THREE.Vector3(pontoAtual.pos.x, camera.position.y, pontoAtual.pos.z)
   );
   const perto = dist < 2.2;
   if (perto && !pontoAtual.perto) {
-    elPrompt.textContent = pontoAtual.texto;
+    elPromptTexto.textContent = pontoAtual.texto;
     elPrompt.classList.add("visivel");
   }
   if (!perto && pontoAtual.perto) {
     elPrompt.classList.remove("visivel");
+    segurando = false;
+    tempoSegurando = 0;
+    elPromptBarra.style.width = "0%";
   }
   pontoAtual.perto = perto;
-}
 
-function aoAcionarPonto() {
-  if (pontoAtual && pontoAtual.perto) {
-    const acao = pontoAtual.aoAcionar;
-    limparPonto();
-    acao();
+  if (perto && segurando) {
+    tempoSegurando += delta;
+    elPromptBarra.style.width = `${Math.min(100, (tempoSegurando / DURACAO_SEGURAR) * 100)}%`;
+    if (tempoSegurando >= DURACAO_SEGURAR) {
+      const acao = pontoAtual.aoAcionar;
+      limparPonto();
+      acao();
+    }
+  } else if (!perto) {
+    elPromptBarra.style.width = "0%";
   }
 }
 
@@ -557,13 +575,99 @@ function aoTeclaBaixo(e) {
   if (e.code === "KeyA") teclas.a = true;
   if (e.code === "KeyS") teclas.s = true;
   if (e.code === "KeyD") teclas.d = true;
-  if (e.code === "KeyE") aoAcionarPonto();
+  if (e.code === "KeyE") segurando = true;
 }
 function aoTeclaCima(e) {
   if (e.code === "KeyW") teclas.w = false;
   if (e.code === "KeyA") teclas.a = false;
   if (e.code === "KeyS") teclas.s = false;
   if (e.code === "KeyD") teclas.d = false;
+  if (e.code === "KeyE") {
+    segurando = false;
+    tempoSegurando = 0;
+    elPromptBarra.style.width = "0%";
+  }
+}
+
+/* ---------------- controles de toque (celular) ---------------- */
+const ehMobile = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+const elJoystickBase = document.getElementById("joystick-base");
+const elJoystickBolinha = document.getElementById("joystick-bolinha");
+const elBotaoAcao = document.getElementById("botao-acao");
+const RAIO_JOYSTICK = 42;
+let joystickId = null;
+let olharId = null;
+let olharUltimo = null;
+let entradaMovX = 0;
+let entradaMovZ = 0;
+
+function centroElemento(el) {
+  const r = el.getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}
+
+function atualizarJoystick(touch) {
+  const centro = centroElemento(elJoystickBase);
+  let dx = touch.clientX - centro.x;
+  let dy = touch.clientY - centro.y;
+  const dist = Math.min(Math.hypot(dx, dy), RAIO_JOYSTICK);
+  const ang = Math.atan2(dy, dx);
+  dx = Math.cos(ang) * dist;
+  dy = Math.sin(ang) * dist;
+  elJoystickBolinha.style.transform = `translate(${dx}px, ${dy}px)`;
+  entradaMovX = dx / RAIO_JOYSTICK;
+  entradaMovZ = dy / RAIO_JOYSTICK;
+}
+
+function resetJoystick() {
+  elJoystickBolinha.style.transform = "translate(0px, 0px)";
+  entradaMovX = 0;
+  entradaMovZ = 0;
+}
+
+function aoTocarInicio(e) {
+  for (const touch of e.changedTouches) {
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (el && el.closest("#botao-acao")) continue;
+    if (el && el.closest("#joystick-base") && joystickId === null) {
+      joystickId = touch.identifier;
+      atualizarJoystick(touch);
+    } else if (olharId === null && !(el && el.closest("#controles-touch"))) {
+      olharId = touch.identifier;
+      olharUltimo = { x: touch.clientX, y: touch.clientY };
+    }
+  }
+}
+
+function aoTocarMover(e) {
+  for (const touch of e.changedTouches) {
+    if (touch.identifier === joystickId) {
+      atualizarJoystick(touch);
+    } else if (touch.identifier === olharId && olharUltimo && controleAtivo) {
+      const dx = touch.clientX - olharUltimo.x;
+      const dy = touch.clientY - olharUltimo.y;
+      olharUltimo = { x: touch.clientX, y: touch.clientY };
+      euler.setFromQuaternion(camera.quaternion);
+      euler.y -= dx * 0.0032;
+      euler.x -= dy * 0.0032;
+      euler.x = Math.max(-PI_2, Math.min(PI_2, euler.x));
+      camera.quaternion.setFromEuler(euler);
+    }
+  }
+  if (e.cancelable) e.preventDefault();
+}
+
+function aoTocarFim(e) {
+  for (const touch of e.changedTouches) {
+    if (touch.identifier === joystickId) {
+      joystickId = null;
+      resetJoystick();
+    }
+    if (touch.identifier === olharId) {
+      olharId = null;
+      olharUltimo = null;
+    }
+  }
 }
 
 function moverJogador(delta) {
@@ -576,16 +680,25 @@ function moverJogador(delta) {
   const lateral = new THREE.Vector3();
   lateral.crossVectors(camera.up, direcao).normalize();
 
+  let frente = 0;
+  let lado = 0;
+  if (teclas.w) frente += 1;
+  if (teclas.s) frente -= 1;
+  if (teclas.a) lado += 1;
+  if (teclas.d) lado -= 1;
+  frente += -entradaMovZ;
+  lado += -entradaMovX;
+  frente = Math.max(-1, Math.min(1, frente));
+  lado = Math.max(-1, Math.min(1, lado));
+
   const passo = VELOCIDADE * delta;
-  if (teclas.w) camera.position.addScaledVector(direcao, passo);
-  if (teclas.s) camera.position.addScaledVector(direcao, -passo);
-  if (teclas.a) camera.position.addScaledVector(lateral, passo);
-  if (teclas.d) camera.position.addScaledVector(lateral, -passo);
+  camera.position.addScaledVector(direcao, frente * passo);
+  camera.position.addScaledVector(lateral, lado * passo);
 
   camera.position.x = Math.max(-LIMITES.x, Math.min(LIMITES.x, camera.position.x));
   camera.position.z = Math.max(LIMITES.zMin, Math.min(LIMITES.zMax, camera.position.z));
 
-  const movendo = teclas.w || teclas.a || teclas.s || teclas.d;
+  const movendo = frente !== 0 || lado !== 0;
   tempoBob += delta * (movendo ? 7 : 1.3);
   const bob = movendo ? Math.sin(tempoBob) * 0.035 : Math.sin(tempoBob) * 0.006;
   camera.position.y = ALTURA_JOGADOR + bob;
@@ -606,7 +719,7 @@ function loop() {
 
   moverJogador(delta);
   animarChuva(delta);
-  verificarPonto();
+  verificarPonto(delta);
   renderer.render(scene, camera);
 }
 
@@ -627,7 +740,7 @@ function entrarNaDoceria() {
         "Alguns nomes foram alterados.",
         "Use fones de ouvido.",
         "23:48",
-        "Confeitaria Flor de Cacau — São Paulo",
+        "Doceria Arko Eros — São Paulo",
         "Começa a chover.",
         "Você está fechando a loja.",
       ],
@@ -645,12 +758,34 @@ function iniciarJogo() {
       loop();
     }
     controleAtivo = true;
-    Chuva.iniciar({ volume: 0.16 });
+    Chuva.iniciar({ volume: 0.11 });
 
-    renderer.domElement.addEventListener("click", () => {
-      if (!travado) renderer.domElement.requestPointerLock();
-    });
-    renderer.domElement.requestPointerLock();
+    if (ehMobile) {
+      document.body.classList.add("touch");
+      travado = true;
+      elMira.style.display = "block";
+      elScene3d.addEventListener("touchstart", aoTocarInicio, { passive: false });
+      elScene3d.addEventListener("touchmove", aoTocarMover, { passive: false });
+      elScene3d.addEventListener("touchend", aoTocarFim);
+      elScene3d.addEventListener("touchcancel", aoTocarFim);
+      elBotaoAcao.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        segurando = true;
+      });
+      elBotaoAcao.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        segurando = false;
+        tempoSegurando = 0;
+        elPromptBarra.style.width = "0%";
+      });
+    } else {
+      renderer.domElement.addEventListener("click", () => {
+        if (!travado) renderer.domElement.requestPointerLock();
+      });
+      renderer.domElement.requestPointerLock();
+    }
 
     elFade.classList.remove("ativo");
     iniciarTarefas();
@@ -659,10 +794,10 @@ function iniciarJogo() {
 
 // --- 9.1 tarefas de fechamento ---
 const TAREFAS = [
-  { pos: new THREE.Vector3(-3.6, 0, -2), texto: "PRESSIONE  E  PARA APAGAR AS LUZES", fala: "Apagando as luzes de vitrine..." },
-  { pos: new THREE.Vector3(3.6, 0, -2), texto: "PRESSIONE  E  PARA FECHAR O CAIXA", fala: "Fechando o caixa do dia." },
-  { pos: new THREE.Vector3(-3.6, 0, -8), texto: "PRESSIONE  E  PARA GUARDAR OS DOCES", fala: "Guardando os doces que sobraram." },
-  { pos: new THREE.Vector3(3.6, 0, -8), texto: "PRESSIONE  E  PARA CONFERIR A PORTA", fala: "Conferindo se a porta está trancada." },
+  { pos: new THREE.Vector3(-3.6, 0, -2), texto: "SEGURE PARA APAGAR AS LUZES", fala: "Apagando as luzes de vitrine..." },
+  { pos: new THREE.Vector3(3.6, 0, -2), texto: "SEGURE PARA FECHAR O CAIXA", fala: "Fechando o caixa do dia." },
+  { pos: new THREE.Vector3(-3.6, 0, -8), texto: "SEGURE PARA GUARDAR OS DOCES", fala: "Guardando os doces que sobraram." },
+  { pos: new THREE.Vector3(3.6, 0, -8), texto: "SEGURE PARA CONFERIR A PORTA", fala: "Conferindo se a porta está trancada." },
 ];
 
 function iniciarTarefas(indice = 0) {
@@ -690,21 +825,21 @@ function iniciarEventoCelular1() {
 const OBJETOS = [
   {
     pos: new THREE.Vector3(-3.6, 0, -5),
-    texto: "PRESSIONE  E  PARA VER O QUE É",
+    texto: "SEGURE PARA VER O QUE É",
     icone: "📄",
     titulo: "Um ingresso velho.",
     revelacao: "Banda Calypso",
   },
   {
     pos: new THREE.Vector3(3.6, 0, -5),
-    texto: "PRESSIONE  E  PARA VER O QUE É",
+    texto: "SEGURE PARA VER O QUE É",
     icone: "📱",
     titulo: "Um print de uma conversa antiga.",
     revelacao: "Oi. A Ana me passou seu contato kkkkk",
   },
   {
     pos: new THREE.Vector3(0, 0, -13),
-    texto: "PRESSIONE  E  PARA VER O QUE É",
+    texto: "SEGURE PARA VER O QUE É",
     icone: "🐶",
     titulo: "Uma coleira.",
     revelacao: "Orion",
@@ -774,7 +909,7 @@ function iniciarDeposito() {
   animarValor(lanterna, "intensity", 1.5, 1800);
 
   setTimeout(() => {
-    definirPonto(new THREE.Vector3(0, 0, -16.5), "PRESSIONE  E  PARA ILUMINAR A PAREDE", () => {
+    definirPonto(new THREE.Vector3(0, 0, -16.5), "SEGURE PARA ILUMINAR A PAREDE", () => {
       mostrarLegenda("Você ainda não lembrou.", 4200);
       setTimeout(iniciarPortaFinal, 4600);
     });
@@ -818,7 +953,7 @@ function iniciarPortaFinal() {
 // --- 9.8 revelação: a loja fica quente e aconchegante ---
 function iniciarRevelacao() {
   mostrarLegenda("As luzes acendem.", 2600);
-  Chuva.mudarVolume(0.12, 3);
+  Chuva.mudarVolume(0.09, 3);
 
   luzesTeto.forEach((l) => {
     l.color.set(0xffd9a0);

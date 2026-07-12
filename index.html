@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Turno da Noite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +21,10 @@
     </div>
 
     <div id="legenda"></div>
-    <div id="prompt"></div>
+    <div id="prompt">
+      <div id="prompt-texto"></div>
+      <div id="prompt-barra"><div id="prompt-barra-preenchimento"></div></div>
+    </div>
     <div id="mira">+</div>
 
     <div id="scene">
@@ -36,6 +40,11 @@
     <div id="scene3d"></div>
     <div id="vhs-scan"></div>
     <div id="vhs-vinheta"></div>
+
+    <div id="controles-touch">
+      <div id="joystick-base"><div id="joystick-bolinha"></div></div>
+      <div id="botao-acao">SEGURAR</div>
+    </div>
 
     <div id="celular">
       <div class="celular-cartao">
